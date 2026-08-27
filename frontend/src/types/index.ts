@@ -1,0 +1,1 @@
+export type CrisisState = {active:boolean;demo_mode:boolean;crisis:any;assessment:any;plan:any;previous_plan:any;data:{zones:any[];roads:any[];shelters:any[];hospitals:any[];resources:any[]};events:any[];audit:any[];metrics:any};
