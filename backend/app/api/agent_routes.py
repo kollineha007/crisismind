@@ -25,7 +25,7 @@ def locations():
 @router.get("/events")
 def events(): return service.events
 @router.get("/agents/status")
-def agent_status(): return {"agents":[{"name":n,"status":"COMPLETED" if service.active else "WAITING","purpose":f"{n} emergency decision responsibility","current_task":"Decision analysis" if service.active else "Waiting for crisis","last_message":service.agent_logs.get(n,[{"message":"Waiting for crisis"}])[-1]["message"],"execution_count":len(service.agent_logs.get(n,[])),"logs":service.agent_logs.get(n,[])} for n in AGENTS]}
+def agent_status(): return {"agents":[service.agent_states.get(n,{"name":n,"status":"WAITING","last_message":"Waiting for crisis","execution_count":0,"logs":[]}) | {"purpose":f"{n} emergency decision responsibility","current_task":"Decision analysis" if service.active else "Waiting for crisis"} for n in AGENTS]}
 @router.get("/agents")
 def agents(): return agent_status()
 @router.get("/agents/{agent_id}")

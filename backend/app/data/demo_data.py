@@ -10,6 +10,16 @@ LOCATIONS = [
  {"id":"delhi","name":"Delhi","state":"Delhi","latitude":28.6139,"longitude":77.2090},
 ]
 
+LOCATION_PROFILES = {
+ "vijayawada":{"population_scale":1.0,"severity":"HIGH","water_level":2.4,"shelter_scale":1.0,"hospital_scale":1.0},
+ "hyderabad":{"population_scale":0.62,"severity":"MEDIUM","water_level":1.6,"shelter_scale":0.8,"hospital_scale":0.9},
+ "visakhapatnam":{"population_scale":0.72,"severity":"HIGH","water_level":2.1,"shelter_scale":0.85,"hospital_scale":0.95},
+ "chennai":{"population_scale":0.9,"severity":"HIGH","water_level":2.0,"shelter_scale":1.15,"hospital_scale":1.2},
+ "bengaluru":{"population_scale":0.48,"severity":"MEDIUM","water_level":1.4,"shelter_scale":0.7,"hospital_scale":1.1},
+ "mumbai":{"population_scale":0.85,"severity":"HIGH","water_level":2.2,"shelter_scale":1.25,"hospital_scale":1.3},
+ "delhi":{"population_scale":0.35,"severity":"LOW","water_level":0.9,"shelter_scale":0.65,"hospital_scale":1.0},
+}
+
 ZONES = [
  {"name":"Zone A","population":2400,"severity":"HIGH","medical_risk":"HIGH","latitude":16.506,"longitude":80.641,"evacuation_status":"REQUIRED"},
  {"name":"Zone B","population":1900,"severity":"HIGH","medical_risk":"MEDIUM","latitude":16.512,"longitude":80.648,"evacuation_status":"REQUIRED"},
@@ -46,8 +56,20 @@ RESOURCES = [
 
 def snapshot(location_id="vijayawada"):
 	location=next((item for item in LOCATIONS if item["id"]==location_id),LOCATIONS[0])
+	profile=LOCATION_PROFILES.get(location["id"],LOCATION_PROFILES["vijayawada"])
 	data={"zones": deepcopy(ZONES), "roads": deepcopy(ROADS), "shelters": deepcopy(SHELTERS), "hospitals": deepcopy(HOSPITALS), "resources": deepcopy(RESOURCES)}
 	lat_delta=location["latitude"]-LOCATIONS[0]["latitude"]; lon_delta=location["longitude"]-LOCATIONS[0]["longitude"]
 	for group in ("zones","shelters","hospitals"):
 		for item in data[group]: item["latitude"]+=lat_delta; item["longitude"]+=lon_delta
+	for zone in data["zones"]:
+		zone["population"] = round(zone["population"] * profile["population_scale"])
+		zone["severity"] = profile["severity"] if zone["severity"] == "HIGH" else ("MEDIUM" if profile["severity"] == "HIGH" else profile["severity"])
+		zone["medical_risk"] = "HIGH" if profile["severity"] == "HIGH" and zone["medical_risk"] == "HIGH" else zone["medical_risk"]
+	for shelter in data["shelters"]:
+		shelter["capacity"] = round(shelter["capacity"] * profile["shelter_scale"])
+		shelter["occupancy"] = min(round(shelter["occupancy"] * profile["shelter_scale"]), shelter["capacity"])
+	for hospital in data["hospitals"]:
+		hospital["total_beds"] = round(hospital["total_beds"] * profile["hospital_scale"])
+		hospital["available_beds"] = min(round(hospital["available_beds"] * profile["hospital_scale"]), hospital["total_beds"])
+		hospital["icu_beds"] = round(hospital["icu_beds"] * profile["hospital_scale"])
 	return data

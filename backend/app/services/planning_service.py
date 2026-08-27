@@ -9,5 +9,5 @@ from ..models.crisis import CrisisInput
 from ..graph.crisis_graph import run_workflow
 
 def generate(crisis, data, version, blocked=False, changes=None):
-    assessment = assess(crisis); run_workflow(crisis.model_dump(mode="json"), assessment.model_dump()); geo = analyze(data); shelter = shelter_allocate(data, blocked); medical = medical_allocate(data); resource = resource_allocate(data, blocked)
-    return assessment, geo, shelter, medical, resource, build_plan(assessment, geo, shelter, medical, resource, version, changes)
+    assessment = assess(crisis, data); run_workflow(crisis.model_dump(mode="json"), assessment.model_dump(), data); geo = analyze(data); shelter = shelter_allocate(data, blocked); medical = medical_allocate(data); resource = resource_allocate(data, blocked)
+    return assessment, geo, shelter, medical, resource, build_plan(assessment, geo, shelter, medical, resource, version, changes, crisis.location)
