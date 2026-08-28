@@ -3,13 +3,15 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 class CrisisInput(BaseModel):
-    disaster_type: str = "FLOOD"
+    disaster_type: str = "Flood"
     location: str = "Vijayawada"
+    description: str = ""
     water_level: float = Field(2.4, ge=0)
     affected_population: int = Field(8500, ge=0)
     blocked_roads: int = Field(2, ge=0)
     reports: list[str] = []
     timestamp: datetime | None = None
+
 
 class Assessment(BaseModel):
     disaster_type: str
